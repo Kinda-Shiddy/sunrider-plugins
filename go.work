@@ -1,0 +1,7 @@
+go 1.20
+
+use (
+	.
+	./outbound_loki
+	./outbound_prometheus
+)

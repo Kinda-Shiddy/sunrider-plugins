@@ -1,7 +1,6 @@
 package http_check
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -14,38 +13,27 @@ type LinkCheckResult struct {
 	Error    error
 }
 
+// Modify the CheckLink function to use the blackbox_exporter for link checking
 func CheckLink(link string, c chan LinkCheckResult, client *http.Client) {
 	trimmedLink := strings.TrimSpace(link)
-	maxRetries := 3
 
-	for i := 0; i < maxRetries; i++ {
-		start := time.Now()
+	// Use the blackbox_exporter URL for link checking
+	blackboxURL := "http://blackbox_exporter:9115/probe?module=http_2xx&target=" + trimmedLink
 
-		req, err := http.NewRequest("GET", trimmedLink, nil)
-		if err != nil {
-			c <- LinkCheckResult{Link: trimmedLink, Up: false, Duration: time.Since(start), Error: err}
-			continue
-		}
-
-		resp, err := client.Do(req)
-		if err != nil {
-			// Try again with HTTP/1.1
-			client = &http.Client{}
-			req.Proto = "HTTP/1.1"
-			resp, err = client.Do(req)
-			if err != nil {
-				c <- LinkCheckResult{Link: trimmedLink, Up: false, Duration: time.Since(start), Error: err}
-				continue
-			}
-		}
-
-		defer resp.Body.Close()
-
-		// If we reach this point, the request was successful. Send the result and return.
-		c <- LinkCheckResult{Link: trimmedLink, Up: true, Duration: time.Since(start)}
+	req, err := http.NewRequest("GET", blackboxURL, nil)
+	if err != nil {
+		c <- LinkCheckResult{Link: trimmedLink, Up: false, Duration: 0, Error: err}
 		return
 	}
 
-	// If we reach this point, all retries have failed. Send a failure result.
-	c <- LinkCheckResult{Link: trimmedLink, Up: false, Duration: time.Duration(maxRetries) * time.Second, Error: fmt.Errorf("all retries failed")}
+	resp, err := client.Do(req)
+	if err != nil {
+		c <- LinkCheckResult{Link: trimmedLink, Up: false, Duration: 0, Error: err}
+		return
+	}
+
+	defer resp.Body.Close()
+
+	// If we reach this point, the request was successful. Send the result and return.
+	c <- LinkCheckResult{Link: trimmedLink, Up: true, Duration: 0}
 }

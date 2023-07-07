@@ -1,15 +1,14 @@
+//outbound_prometheus/prometheus.go
+
 package outbound_prometheus
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func RegisterPrometheusIntegration() {
-	http.Handle("/metrics", promhttp.Handler())
+func RegisterPrometheusIntegration(metrics *PrometheusMetrics) {
+	prometheus.MustRegister(metrics.linkCheckStatus)
+	prometheus.MustRegister(metrics.linkCheckDuration)
 }
 
 type PrometheusMetrics struct {
@@ -18,22 +17,21 @@ type PrometheusMetrics struct {
 }
 
 func NewPrometheusMetrics() *PrometheusMetrics {
+	histogramOpts := prometheus.HistogramOpts{
+		Name:    "link_check_duration_seconds",
+		Help:    "Duration of the link checks",
+		Buckets: []float64{0.1, 0.5, 1, 2, 5, 10},
+	}
+
 	return &PrometheusMetrics{
 		linkCheckStatus: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "link_check_status",
 			Help: "The status of the link check",
 		}, []string{"link", "status_code"}),
-		linkCheckDuration: prometheus.NewHistogram(prometheus.HistogramOpts{
-			Name: "link_check_duration_seconds",
-			Help: "Duration of the link checks",
-		}),
+		linkCheckDuration: prometheus.NewHistogram(histogramOpts),
 	}
 }
 
-func (pm *PrometheusMetrics) SetLinkCheckStatus(link string, statusCode int, value float64) {
-	pm.linkCheckStatus.WithLabelValues(link, strconv.Itoa(statusCode)).Set(value)
-}
-
-func (pm *PrometheusMetrics) ObserveLinkCheckDuration(duration float64) {
-	pm.linkCheckDuration.Observe(duration)
+func RegisterBlackboxExporterMetrics(metrics *PrometheusMetrics) {
+	RegisterPrometheusIntegration(metrics)
 }
