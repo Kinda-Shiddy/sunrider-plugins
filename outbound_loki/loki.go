@@ -1,7 +1,7 @@
 package outbound_loki
 
 import (
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/go-kit/log"
@@ -27,7 +27,7 @@ func NewLokiLogger(logger log.Logger) *LokiLogger {
 }
 
 func (ll *LokiLogger) LogResult(r LinkCheckResult) {
-	msg := fmt.Sprintf("Checked %s, up: %t, status code: %d, duration: %v, error: %v", r.Link, r.Up, r.StatusCode, r.Duration, r.Error)
+	msg := "Checked " + r.Link + ", up: " + strconv.FormatBool(r.Up) + ", status code: " + strconv.Itoa(r.StatusCode) + ", duration: " + r.Duration.String() + ", error: " + r.Error.Error()
 	level.Info(ll.logger).Log(
 		"msg", msg,
 		"link", r.Link,
@@ -38,5 +38,4 @@ func (ll *LokiLogger) LogResult(r LinkCheckResult) {
 	if r.Error != nil {
 		level.Error(ll.logger).Log("msg", "Error during check", "err", r.Error)
 	}
-	fmt.Println(msg) // Print each test result on a new line
 }
