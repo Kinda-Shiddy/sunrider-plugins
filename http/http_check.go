@@ -2,8 +2,12 @@ package http_check
 
 import (
 	"net/http"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 )
 
 type LinkCheckResult struct {
@@ -19,6 +23,8 @@ func CheckLink(link string, c chan LinkCheckResult, client *http.Client) {
 
 	// Use the blackbox_exporter URL for link checking
 	blackboxURL := "http://blackbox_exporter:9115/probe?module=http_2xx&target=" + trimmedLink
+	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
+	level.Info(logger).Log("msg", "Performing link check", "link", trimmedLink)
 
 	req, err := http.NewRequest("GET", blackboxURL, nil)
 	if err != nil {
