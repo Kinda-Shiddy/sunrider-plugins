@@ -1,5 +1,3 @@
-//outbound_prometheus/prometheus.go
-
 package outbound_prometheus
 
 import (
@@ -30,8 +28,4 @@ func NewPrometheusMetrics() *PrometheusMetrics {
 		}, []string{"link", "status_code"}),
 		linkCheckDuration: prometheus.NewHistogram(histogramOpts),
 	}
-}
-
-func RegisterBlackboxExporterMetrics(metrics *PrometheusMetrics) {
-	RegisterPrometheusIntegration(metrics)
 }
