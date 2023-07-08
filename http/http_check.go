@@ -1,3 +1,5 @@
+// http/http_check.go
+
 package http_check
 
 import (
@@ -17,7 +19,6 @@ type LinkCheckResult struct {
 	Error    error
 }
 
-// Modify the CheckLink function to use the blackbox_exporter for link checking
 func CheckLink(link string, c chan LinkCheckResult, client *http.Client) {
 	trimmedLink := strings.TrimSpace(link)
 
