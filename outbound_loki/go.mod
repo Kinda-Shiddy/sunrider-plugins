@@ -1,4 +1,4 @@
-module outbound_loki
+module github.com/kojikeneda/sunrider-plugins/outbound_loki
 
 go 1.20
 

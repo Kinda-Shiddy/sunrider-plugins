@@ -1,4 +1,4 @@
-module github.com/kojikeneda/sunrider-plugins
+module github.com/kojikeneda/sunrider-plugins/http-check
 
 go 1.20
 

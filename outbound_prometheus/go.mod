@@ -1,4 +1,4 @@
-module outbound_prometheus
+module github.com/kojikeneda/sunrider-plugins/outbound_prometheus
 
 go 1.20
 

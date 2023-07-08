@@ -1,7 +1,6 @@
 go 1.20
 
 use (
-	.
+	./http
 	./outbound_loki
-	./outbound_prometheus
 )
